@@ -23,21 +23,48 @@ The notebook uses Python, Node.js/npx, the packages in `requirements.txt`, and a
 `OPENAI_MODEL` can override it. No credential is embedded in the notebook.
 The local npm server is pinned to `@modelcontextprotocol/server-filesystem@2.0.1`.
 
-## Evidence files
+## Reproducible execution and evidence
 
-| File | Contents |
+The validated environment uses Python 3.11.16. `requirements.txt` records the
+exact versions used by the notebook, and setup rejects mismatched packages
+before making a model request. The setup output includes the active interpreter,
+working directory, environment-file presence, model, and package versions.
+
+Every full execution creates `evidence/runs/<run_id>/`. Its artifacts include:
+
+| File within a run | Contents |
 |---|---|
-| `evidence/discovery.json` | Actual tool inventory and resource discovery |
-| `evidence/tool_log.jsonl` | Full MCP tool arguments, responses, scenario labels, and call IDs |
-| `evidence/agent_runs.json` | Queries, final answers, and full message traces |
-| `evidence/langchain_guide.md` | Snapshot of the MCP resource used as model context |
-| `evidence/resource_checks.json` | Resource URI, SHA-256, keyword matches, and source lines |
-| `evidence/direct_memory_page.md` | Snapshot used for the direct HTTP comparison |
-| `evidence/direct_comparison.json` | Direct HTTP metadata and both comparison answers |
-| `evidence/grounding_review.json` | Observed source-reading error and the reason for a targeted recheck |
-| `evidence/manifest.json` | Runtime versions, source hashes, and completed scenarios |
+| `discovery.json` | Tool inventory and resource discovery |
+| `tool_log.jsonl` | Raw MCP results, model-visible filtered results, selected source URLs, and call IDs |
+| `agent_runs.json` | Queries, answers, corrections, validation status, and full messages |
+| `langchain_guide.md` | Resource snapshot supplied to the resource-only agent |
+| `resource_checks.json` | Resource URI, hash, keyword matches, and supporting excerpts |
+| `direct_memory_page.md` | Page snapshot for the direct HTTP comparison |
+| `direct_comparison.json` | HTTP metadata, page hash, and comparison answers |
+| `manifest.json` | Run ID, Python and package versions, source hashes, and scenario counts |
+| `validation.json` | Completed artifact-validation summary |
 
-The notebook uses top-level `await`, as in the course examples. Its saved outputs
+The final notebook cell uses `lab_artifacts.py` to validate the evidence set,
+regenerate `lab_proof.md`, and update `evidence/latest.json`. The proof includes
+resource excerpts beside the observed resource answer, and a table maps each
+practical analysis question to its tool-call IDs. Excerpts use fences long enough
+to preserve nested source code blocks.
+
+`evidence/history/before-feedback/` retains earlier material and its provenance
+note. Historical call IDs are scoped to those records and are excluded from the
+current proof. A fresh run does not overwrite the earlier evidence directory.
+
+Documentation search results are filtered to Python LangChain and LangGraph
+pages before reaching the model. Raw results remain available for inspection.
+Answer checks require exact selected source URLs and the combined query's
+expected Filesystem command. These are source-scope and trace checks, not a
+complete semantic verifier.
+
+The regression tests in `tests/test_artifacts.py` cover missing call references,
+changed resource snapshots, dependency drift, and nested code fences. They use
+copies of the selected evidence run and never copy `.env` or call external APIs.
+
+The notebook uses top-level `await`, as in the course examples. Saved outputs
 show the observed run; remote documents and model responses can change later.
 The Windows stderr adjustment follows the supplied notebook's workaround.
 

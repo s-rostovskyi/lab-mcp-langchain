@@ -1,32 +1,33 @@
 # Lab Proof: Agents that Speak MCP Fluently
 
-## 1. What I built
+## 1. Workflow and run
 
 The [executed notebook](Lab_agent_speak_fluently.ipynb) connects a local Filesystem
-MCP server over stdio and the public LangChain Docs MCP server over HTTP, with
-one client per server. LangChain agents use converted MCP tools; a separate
-agent receives an MCP resource as context without any tools.
+MCP server over stdio and the public LangChain Docs MCP server over HTTP, using
+one client per server. The local data consists of unchanged copies of the two
+supplied course handouts. They replace the unavailable Project Atlas documents.
+LangChain Docs is the remote alternative permitted by the lab; it needs no token.
 
-The local data consists of unchanged copies of the supplied course handouts in
-`sample_docs/`. These replace the unavailable Project Atlas sample files. The
-lab permits other servers and corresponding questions; LangChain Docs replaces
-GitHub so no GitHub token is required. The model is `gpt-4o-mini`.
+This proof describes run `20261028T154143Z-5d8544ae` only. Its artifacts are in
+[evidence/runs/20261028T154143Z-5d8544ae](evidence/runs/20261028T154143Z-5d8544ae/manifest.json). Historical material is separately labeled in
+`evidence/history/` and is excluded from the current trace.
+
+The run used Python 3.11.16 and model `gpt-4o-mini`. Installed
+package versions exactly match [requirements.txt](requirements.txt). Setup
+records the interpreter, working directory, credential availability, and versions.
 
 ## 2. Query
 
 > Read mcp_servers_local_vs_remote.md. Quote the exact npx command from its JavaScript Filesystem example, including the package name and directory argument. Then search the official Python LangChain documentation for local stdio MCP connections. Which transport fits that configuration, and does using that transport alone guarantee that file contents remain on this computer when the local Python agent uses hosted ChatOpenAI? This is not a Managed Deep Agents deployment. Separate source evidence from the inference about hosted model data flow.
 
-## 3. Evidence
+## 3. Tool evidence
 
-The entries below are from the actual interceptor log for the combined query.
-Result excerpts are abbreviated for readability; the complete responses are in
-[tool_log.jsonl](evidence/tool_log.jsonl), and the corresponding model messages
-and tool-call identifiers are in [agent_runs.json](evidence/agent_runs.json).
-Policy blocks, if present, are client-side rejections rather than server results.
+The following call IDs belong to this run. Full raw server responses and the
+filtered content actually delivered to the model are preserved in
+[tool_log.jsonl](evidence/runs/20261028T154143Z-5d8544ae/tool_log.jsonl). Model messages and the final answers are
+in [agent_runs.json](evidence/runs/20261028T154143Z-5d8544ae/agent_runs.json).
 
-### call-025: filesystem / list_directory
-
-Arguments:
+### call-004: filesystem / list_directory
 
 ```json
 {
@@ -34,36 +35,28 @@ Arguments:
 }
 ```
 
-Observed error status: `False`.
-
-Result excerpt:
+Error status: `False`. Result excerpt:
 
 ```text
 [FILE] mcp_servers_local_vs_remote.md
 [FILE] mcp_tools_resources_prompts.md
 ```
 
-### call-026: filesystem / list_directory
-
-Arguments:
+### call-005: filesystem / list_directory
 
 ```json
 {
-  "path": "F:\\UserData\\Desktop\\AI_Consulting_and_Integration\\Week_04\\Day_3\\lab-mcp-langchain"
+  "path": "F:\\UserData\\Desktop\\AI_Consulting_and_Integration\\Week_04\\Day_3"
 }
 ```
 
-Observed error status: `True`.
-
-Result excerpt:
+Error status: `True`. Result excerpt:
 
 ```text
-Access denied - path outside allowed directories: F:\UserData\Desktop\AI_Consulting_and_Integration\Week_04\Day_3\lab-mcp-langchain not in F:\UserData\Desktop\AI_Consulting_and_Integration\Week_04\Day_3\lab-mcp-langchain\sample_docs
+Access denied - path outside allowed directories: F:\UserData\Desktop\AI_Consulting_and_Integration\Week_04\Day_3 not in F:\UserData\Desktop\AI_Consulting_and_Integration\Week_04\Day_3\lab-mcp-langchain\sample_docs
 ```
 
-### call-027: filesystem / read_text_file
-
-Arguments:
+### call-006: filesystem / read_text_file
 
 ```json
 {
@@ -71,44 +64,17 @@ Arguments:
 }
 ```
 
-Observed error status: `False`.
-
-Result excerpt:
+Error status: `False`. Result excerpt:
 
 ```text
-|---|---|---|
-| **Where it runs** | On someone else's computer | On **your** computer |
-| **What you do** | You **call** it | You **start** it |
-| **What you need** | A **URL** | A **command** (`npx` or `uvx`) |
-| **Transport** | `http` | `stdio` |
-
----
 "filesystem": {
     "transport": "stdio",
     "command": "npx",
     "args": ["-y", "@modelcontextprotocol/server-filesystem", "sample_docs"],
 }
 ```
-"time": {
-    "transport": "stdio",
-    "command": "uvx",
-    "args": ["mcp-server-time"],
-}
-```
-| A link like `https://.../mcp` | ☁️ Remote server | `"transport": "http"` + `"url"` |
-| `npx ...` | 💻 Local JavaScript server | `"transport": "stdio"` + `"command": "npx"` |
-| `uvx ...` | 💻 Local Python server | `"transport": "stdio"` + `"command": "uvx"` |
 
----
-| 3 | **What can it reach?** | README: what folder, token or account it needs | Access to all your files, or a token with full rights |
-| 4 | **Where does my data go?** | Local or remote? Hosted by whom? | A remote server outside the client's country or company, or a third party holding your token |
-| 5 | **Did a scan find problems?** | Security scan on Smithery (MCP-Scan) | Warnings, or no scan at all |
-
-```
-
-### call-028: langchain-docs / search_docs_by_lang_chain
-
-Arguments:
+### call-007: langchain-docs / search_docs_by_lang_chain
 
 ```json
 {
@@ -116,169 +82,166 @@ Arguments:
 }
 ```
 
-Observed error status: `False`.
+Error status: `False`. Result excerpt:
 
-Result excerpt:
-
-```text
+````text
 Title: Transports
-Link: https://docs.langchain.com/oss/javascript/langchain/mcp/index#transports
-Page: oss/javascript/langchain/mcp/index
+Link: https://docs.langchain.com/oss/python/langchain/mcp/index#transports
+Page: oss/python/langchain/mcp/index
 Content: ## Transports
 
-[`MCPAdapter`](https://reference.langchain.com/javascript/langchain-mcp-adapters/MCPAdapter) accepts a map of named server definitions. It selects the transport from each definition, so one adapter can connect to local stdio servers and remote HTTP servers at the same time:
+[`MCPAdapter`](https://reference.langchain.com/python/langchain/mcp/adapter/MCPAdapter) infers the transport from the target you provide. The target is the only difference between an in-process server, a local script over stdio, and a remote URL:
 
-```ts theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
-import { MCPAdapter } from "@langchain/mcp-adapters";
+```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
+from pathlib import Path
 
-const adapter = new MCPAdapter({
-  servers: {
-    // A local server launched as a subprocess over stdio.
-    local: {
-      command: "node",
-      args: ["./weather-server.js"],
-    },
+from langchain.mcp import MCPAdapter
 
-    // A remote server reached over Streamable HTTP.
-    remote: {
-      url: "https://example.com/mcp",
-    },
+# An in-process FastMCP server: no subprocess, no socket. Ideal for tests.
+in_memory = MCPAdapter(server)  # a FastMCP instance
 
-    // A legacy server with an explicit SSE endpoint.
-    legacy: {
-      url: "https://legacy.example.com/sse",
-      transport: "sse",
-      mode: "legacy",
-    },
-  },
-});
+# A script path is launched over stdio, one subprocess per adapter.
+stdio = MCPAdapter(Path("weather_server.py"))
 
-try {
-  const tools = await adapter.listTools();
-  // Pass tools to createAgent({ tools, ... }).
-} finally {
-  await adapter.close();
-}
+# A string must be an http(s) URL, reached over streamable HTTP.
+http = MCPAdapter("https://example.com/mcp")
 ```
 
-<Card title="View example trace" icon="chart-line" href="https://smith.langchain.com/public/d9a802f7-75cf-45b4-b0f6-f4a62fa06e27/r" arrow horizontal>
-  Open a public LangSmith run for this example.
-</Card>
+A target can be any of the following:
 
-Each server definition can use one of these transports:
+* **An `http`/`https` URL** (`str`): reached over Streamable HTTP.
+* **A script path** (`Path`): launched as a subprocess over stdio.
+* **A transport object** (`StreamableTransport`): a preconfigured transport object. See [Client Transports](https://gofastmcp.com/clients/transports).
+* **An in-process `FastMCP` server**: connected in memory, without a subprocess or socket.
+* **An `MCPConfig` dict** (`{"mcpServers": {...}}`): several servers behind one adapter. See [Connections](/oss/python/langchain/mcp/connections#multiple-servers).
+* **A prebuilt `fastmcp.Client`**: for full control over transport, [caching](https://gofastmcp.com/clients/client#response-caching), and [protocol negotiation](https://gofastmcp.com/clients/client#protocol-negotiation).
 
-* **stdio**: Provide `command` and `args`. The adapter starts the command as a child process and communicates over standard input and output.
-* **Streamable HTTP**: Provide `url`. This is the default transport for URL-based servers, so `transport: "http"` is optional.
-* **SSE**: Provide `url` and set `transport: "sse"`. Use this transport only for legacy servers that expose an SSE endpoint.
+<Warning>
+  A `str` target must be an `http` or `https` URL. FastMCP resolves a string by testing it as a filesystem path before testing it as a URL, so a string naming an existing `.py` or `.js` file would launch that file as a subprocess. Because strings are the form a target most often arrives in from configuration or from a model, [`MCPAdapter`](https://reference.langchain.com/python/langchain/mcp/adapter/MCPAdapter) rejects strings that do not match the shape of a URL.
+</Warning>
+Tit
+````
 
-Transport selection and protocol negotiation are separate. The optional `mode` setting controls which MCP protocol era the client accepts. See [Protocol eras](/oss/javascript/langchain/mcp/connections#protocol-eras).
+## 4. Observed final answer
 
-<Note>
-  For new remote servers, omit both `transport` and `mode`. The adapter uses Streamable HTTP with automatic protocol negotiation. Specify these settings only when connecting to a server with known legacy requirements.
-</Note>
-Title: stdio servers (default)
-Link: https://docs.langchain.com/oss/deepagents/code/mcp-tools#stdio-servers-default
-Page: oss/deepagents/code/mcp-tools
-Content: ### stdio servers (default)
-
-stdio servers are spawned as child processes. Deep Agents Code communicates with them over stdin/stdout.
-
-Approved
-```
-
-## 4. Final answer
-
-The exact `npx` command from the JavaScript Filesystem example in the file `mcp_servers_local_vs_remote.md` is:
+The exact `npx` command from the **mcp_servers_local_vs_remote.md** file is:
 
 ```python
-"command": "npx",
 "args": ["-y", "@modelcontextprotocol/server-filesystem", "sample_docs"],
 ```
 
-Regarding local stdio MCP connections in the official Python LangChain documentation, the transport that fits this configuration is **stdio**. 
+This command is part of the configuration for a local JavaScript server using the `stdio` transport.
 
-Using stdio alone does not guarantee that file contents remain on the local computer when the local Python agent uses hosted ChatOpenAI. The configured model is a hosted OpenAI model, which means that while the stdio transport allows for local execution, any data processed by the hosted model could potentially be sent to external servers, depending on the model's architecture and data handling policies. 
+From the LangChain documentation, the transport that fits the local stdio MCP connections is `stdio`. This transport allows a script to be launched as a subprocess, enabling interaction with the local environment.
 
-Thus, while stdio facilitates local execution, it does not inherently prevent data from being transmitted to external services when using hosted models. This distinction is crucial for understanding data flow and privacy implications in such configurations. 
+However, using the `stdio` transport alone does not guarantee that file contents remain on the local computer when the local Python agent uses hosted ChatOpenAI. The hosted model may still access data through the agent's configuration, which could involve sending data over the internet, depending on how the agent is set up. Thus, while the transport facilitates local execution, it does not inherently ensure data isolation from external services.
 
-For further details, refer to the documentation on transports: [LangChain Transports](https://docs.langchain.com/oss/python/langchain/mcp/index#transports).
+**Source Evidence:**
+- Command from **mcp_servers_local_vs_remote.md**.
+- Transport information from LangChain documentation: [Transports](https://docs.langchain.com/oss/python/langchain/mcp/index#transports).
 
-## 5. Trace
+## 5. Claim trace
 
-| Claim or observation | Evidence |
+| Claim | Supporting evidence |
 |---|---|
-| The local handout starts Filesystem with npx and a directory argument | `call-027`; `sample_docs/mcp_servers_local_vs_remote.md` |
-| The course configuration uses stdio for a locally started server | `call-027`; the handout's local-server configuration |
-| Live documentation supports a local stdio connection | `call-028`; returned documentation text and links |
-| Local transport alone does not establish where model inference occurs | A limitation inferred from the notebook configuration: tool results become model context and `ChatOpenAI` uses a hosted model. This is not a promise made by the stdio protocol |
+| The handout uses npx and the Filesystem package with a document directory | call-006; exact local configuration excerpt above |
+| stdio fits a locally started MCP server | call-007; selected Python LangChain documentation |
+| Local server execution does not guarantee local model inference | Inference from this notebook's data flow: tool results are passed to the configured hosted ChatOpenAI model |
 
-Both servers were observed in the combined scenario:
-`filesystem, langchain-docs`. The check asserts successful calls from
-both servers, not merely that both tool lists were loaded.
+Only Python LangChain/LangGraph search results are delivered to the documentation
+agents. Other products and language variants remain in the raw log, with the
+selected URLs recorded separately. Final documentation citations must match
+selected source URLs. These checks verify source scope and trace integrity;
+they do not establish that every generated sentence is semantically correct.
 
-### Resource context
+## 6. Resource context
 
-The application fetched `mintlify://skills/langchain` and passed its text into an agent's
-system prompt with `tools=[]`. The snapshot is
-[langchain_guide.md](evidence/langchain_guide.md). Its SHA-256 is
-`1d6867cef2213f10610098210ff68444ea29f49731a412220d9d88550bf3b6bb`. The resource answer and messages appear under `resource`
-in `agent_runs.json`; it produced no MCP tool calls.
+The application read `mintlify://skills/langchain` and provided its snapshot to an agent with
+`tools=[]`. It supported this question:
 
-The [resource checks](evidence/resource_checks.json) preserve matching source
-lines for the answer's keywords, including persistence setup and conversation
-configuration. These checks aid inspection but do not prove arbitrary semantic
-claims. The source explains both a checkpointer and a `thread_id`.
+> What do I need to add to an agent so that it remembers the conversation between calls?
 
-## 6. Failure or limitation
+Observed answer:
 
-The missing-information scenario asked:
+To enable an agent to remember the conversation between calls, you need to pass a `thread_id` in the configuration when invoking the agent. This is done by including `config={"configurable": {"thread_id": "..."}}` in the `agent.invoke()` method. Additionally, ensure that a checkpointer is configured to maintain the agent's state across invocations. Without the `thread_id`, the agent won't persist conversation history. 
+
+For more details, refer to the resource at mintlify://skills/langchain.
+
+Supporting excerpts from [langchain_guide.md](evidence/runs/20261028T154143Z-5d8544ae/langchain_guide.md):
+
+Line 160:
+
+> - **Missing thread_id**: Agent won't persist conversation history without `thread_id` in config. Always pass `config={"configurable": {"thread_id": "..."}}` for multi-turn conversations.
+
+Line 167:
+
+> - **Checkpointer required for persistence**: Without a checkpointer, agent state is lost between invocations. Use `InMemorySaver()` locally or configure persistent store in production.
+
+The snapshot SHA-256 is `1d6867cef2213f10610098210ff68444ea29f49731a412220d9d88550bf3b6bb`. The resource agent made no
+tool calls. [resource_checks.json](evidence/runs/20261028T154143Z-5d8544ae/resource_checks.json) records the URI,
+hash, keyword checks, and source lines. Keyword matches aid review but are not a
+general proof of semantic grounding.
+
+## 7. Failure and limitations
+
+Missing-information query:
 
 > Read all documents in the folder. What exact monthly hosting price in EUR do they specify for the LangChain Docs MCP server? If it is not stated, report that explicitly.
 
-The observed answer was:
+Observed answer:
 
-> The documents do not specify an exact monthly hosting price in EUR for the LangChain Docs MCP server. Therefore, the answer is: **not stated in the documents**.
+> The documents in the specified folder do not mention any exact monthly hosting price in EUR for the LangChain Docs MCP server. 
 
-Its tool evidence is retained under `missing_price` in `agent_runs.json` and
-`tool_log.jsonl`. The absence of an exact price in these documents does not mean
-the real service has no costs; it means the supplied sources do not establish one.
+1. The first document, "mcp_servers_local_vs_remote.md," discusses the operational aspects of MCP servers but does not provide pricing information.
+2. The second document, "mcp_tools_resources_prompts.md," focuses on the functionalities and types of tools, resources, and prompts available in an MCP server, without any reference to costs.
 
-A concrete source-reading error was also observed during review. The earlier
-combined answer called the Filesystem command `uvx`, while the handout's
-JavaScript example uses `npx`. This was a false interpretation despite successful
-tool calls. [grounding_review.json](evidence/grounding_review.json) retains that
-answer and its original message trace. The corrected scenario requests the exact
-command and verifies the expected package name before accepting the result.
-Earlier related tool events remain labeled `*_before_review` in the full log.
+Therefore, it can be concluded that the exact monthly hosting price is not stated in the provided documents.
 
-An additional grounding risk is confusing local server execution with local
-model execution. A local MCP server can still return information that the client
-passes to a remote model. The combined query explicitly exposes this distinction.
+Evidence: call-012, call-013, call-014. The lack of a price in
+the supplied sources does not establish that the service is free.
 
-Agent middleware exposes only the directory listing tool until discovery succeeds.
-A client-side guard also requires a successful directory listing before other
-filesystem operations. The agents receive only read tools, although the trusted
-Filesystem server itself implements write tools. Remote search can return
-related but different APIs, so source links and full text still require review.
+The historical review in
+[grounding_review.json](evidence/history/before-feedback/grounding_review.json)
+retains an earlier answer that confused `uvx` and `npx`. Its call identifiers are
+historical and are not references into this run. The current combined scenario
+checks that the expected Filesystem command and package appear in the answer.
 
-## 7. Additional completed checks
+Directory-first middleware and a client-side guard restrict the order of file
+operations. The agent receives only read tools, although the underlying trusted
+server still implements write operations. A successful call alone does not
+guarantee a correct interpretation, and a matching URL alone does not validate
+every associated claim. Hosted inference still receives the supplied context.
 
-| Lab step | Implementation and observed evidence |
-|---|---|
-| 1. Setup | `.env` credential presence check, pinned Python dependencies, pinned npm server, runtime manifest |
-| 2. Connect | Two separate clients; tools and resources listed in `discovery.json` |
-| 3. Convert tools | `get_tools()` converts MCP tools; available and selected names appear in notebook output |
-| 4. Individual agents | `filesystem` and `documentation` scenarios, each with successful server calls |
-| 5. Resource context | Actual resource read, snapshot, resource-only agent, keyword and line checks |
-| 6. Complete agent | `combined` and `own_query` each use both servers |
-| 7. Direct comparison, optional | Same memory question over direct HTTP; page snapshot, HTTP status, hash, and answers in `direct_comparison.json` |
-| 8. Practical example, optional | Four `document_analysis_*` scenarios: listing, summary, content search, and read-only tool classification |
+## 8. Practical document analysis
 
-Direct HTTP is sufficient for a known page. MCP adds discovery and lets the
-agent choose searches through the server's tool schema. The direct comparison
-is not a performance benchmark because it may retrieve different text and use
-a different number of model calls.
+| Scenario and question | Call IDs | Observed result |
+|---|---|---|
+| Which documents are in the folder? | call-015 | The documents in the folder are:  1. **mcp_servers_local_vs_remote.md** 2. **mcp_tools_resources_prompts.md** |
+| Summarise mcp_servers_local_vs_remote.md in three bullet points. | call-016, call-017 | **Summary of mcp_servers_local_vs_remote.md:**  - **Server Location and Connection**: MCP servers can be either remote (hosted on someone else's computer, accessed via a URL) or local (run on your own computer, started with a command like `npx` for JavaScript or `uvx` for Python) (source: F:\UserData\Desktop\AI_Consulting_and_Integration\Week_04\Day_3\lab-mcp-langchain\sample_docs\mcp_servers_local_vs_remote.md).  - **Installation and Commands**: To run a local server, you need to install Node.js for JavaScript or the `uv` package for Python. The commands to start these servers differ based on the programming language used (source: F:\UserData\Desktop\AI_Consulting_and_Integration\Week_04\Day_3\lab-mcp-langchain\sample_docs\mcp_servers_local_vs_remote.md).  - **Trust and Security**: When using MCP servers, it's crucial to verify the source, check for updates, understand data access, and ensure security scans have been conducted. Always pin the version to avoid unexpected changes (source: F:\UserData\Desktop\AI_Consulting_and_Integration\Week_04\Day_3\lab-mcp-langchain\sample_docs\mcp_servers_local_vs_remote.md). |
+| Read all documents. Which files mention the LangChain documentation server? Quote the matching text. | call-018, call-019, call-020 | The files that mention the LangChain documentation server are:  1. **mcp_servers_local_vs_remote.md**    - Quote: "Someone else (LangChain, GitHub, ...) runs the server for you. It's always on. You just call its address."    - Quote: `"url": "https://docs.langchain.com/mcp"`  2. **mcp_tools_resources_prompts.md**    - Quote: "We connect to the **LangChain Documentation MCP server** (`https://docs.langchain.com/mcp`). Here is what it offers:"  These quotes indicate that the LangChain documentation server is referenced in both files, providing details about its operation and connection. |
+| Can an MCP tool be read-only? Read the documents and cite a concrete example. | call-021, call-022, call-023 | Yes, an MCP tool can be read-only. For example, in the document "mcp_tools_resources_prompts.md," it states that tools can perform actions, but some tools may only read data without making changes. Specifically, it mentions:  - **Tools**: Functions the LLM can call to act, such as `create_event`. - **Resources**: Read-only information the application fetches and gives to the LLM as context, like retrieving documents or accessing knowledge bases.  In the example provided, two tools (`search_docs_by_lang_chain` and `query_docs_filesystem_docs_by_lang_chain`) are described as only reading data, yet they are still classified as tools because they are called by the model to perform actions (even if those actions are read-only) (source: "F:\\UserData\\Desktop\\AI_Consulting_and_Integration\\Week_04\\Day_3\\lab-mcp-langchain\\sample_docs\\mcp_tools_resources_prompts.md").   This indicates that tools can be designed to perform read-only functions within the MCP framework. |
 
-The final run completed 10 scenarios and recorded
-32 interceptor events. Exact runtime versions, source
-hashes, and completion time are in [manifest.json](evidence/manifest.json).
+## 9. MCP and direct HTTP comparison
+
+The same memory question was answered through MCP search and through a direct
+request to one known documentation page. The direct response status, page hash,
+and both answers are in [direct_comparison.json](evidence/runs/20261028T154143Z-5d8544ae/direct_comparison.json).
+
+| Aspect | MCP | Direct HTTP |
+|---|---|---|
+| Setup | Server configuration, discovery, adapter, interceptor | Known page URL and HTTP client |
+| Flexibility | Agent chooses queries through a standardized tool interface | Model sees the page supplied by the application |
+| Maintenance | Client depends on server tool schemas and service availability | Client handles URLs, response format, and HTTP errors |
+| Evidence | Full tool results, selected source URLs, message trace | Page snapshot, HTTP status, hash, and model answer |
+
+The table reflects the retained MCP traces and direct comparison artifacts.
+Direct HTTP fits a single known page; MCP fits workflows that need discovery or
+reusable integrations across compatible frameworks. This is not a latency
+benchmark: retrieval content and the number of model calls can differ.
+
+## 10. Verification
+
+The completed run contains 10 scenarios and
+23 tool events. Each referenced call exists in this run;
+required server evidence, message/tool-call pairing, source and snapshot hashes,
+dependency versions, and final citation scope passed validation.

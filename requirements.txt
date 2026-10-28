@@ -1,7 +1,7 @@
-langchain==1.4.7
-langchain-openai==1.7.3
+langchain==1.4.6
+langchain-openai==1.7.2
 langchain-mcp-adapters==0.3.2
-langgraph==1.2.18
+langgraph==1.2.16
 mcp==1.30.0
-python-dotenv==1.2.2
+python-dotenv==1.2.4
 httpx==0.28.1
